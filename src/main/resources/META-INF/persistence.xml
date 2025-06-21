@@ -9,7 +9,7 @@
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <!-- DB Driver -->
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/teste"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/bdJogos"/>
             <!-- BD url conection -->
             <property name="javax.persistence.jdbc.user" value="postgres"/>
             <!-- DB User -->

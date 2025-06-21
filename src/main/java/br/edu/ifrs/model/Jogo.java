@@ -22,49 +22,60 @@ public class Jogo {
     @ManyToMany(mappedBy = "jogosDisponiveis")
     private List<Plataforma> plataformas;
 
+    //construtores
+    public Jogo(){
 
-    public int getId() {
-        return id;
+    }
+    public Jogo(String titulo, int anoLancamento, String desenvolvedora, String publicadora){
+        setTitulo(titulo);
+        setAnoLancamento(anoLancamento);
+        setDesenvolvedora(desenvolvedora);
+        setPublicadora(publicadora);
+    }
+    //construtor para retorno de busca no banco de dados
+    public Jogo(int id, String titulo, int anoLancamento, String desenvolvedora, String publicadora){
+        this(titulo, anoLancamento, desenvolvedora, publicadora);
+        setId(id);
     }
 
+    //utilidades
+    //função que valida ano de lançamento
+    private boolean validaAnoLancamento(int anoLancamento){
+        return anoLancamento <= 2050 && anoLancamento > 1969;
+    }
+
+    //getters
+    public int getId() {return id;}
+    public String getTitulo() {return titulo;}
+    public int getAnoLancamento() {return anoLancamento;}
+    public String getDesenvolvedora() {return desenvolvedora;}
+    public String getPublicadora() {return publicadora;}
+    public List<Plataforma> getPlataformas() {return plataformas;}
+
+    //setters
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getTitulo() {
-        return titulo;
     }
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
 
-    public int getAnoLancamento() {
-        return anoLancamento;
-    }
-
     public void setAnoLancamento(int anoLancamento) {
-        this.anoLancamento = anoLancamento;
-    }
-
-    public String getDesenvolvedora() {
-        return desenvolvedora;
+        if(validaAnoLancamento(anoLancamento)){
+            this.anoLancamento = anoLancamento;
+        }
+        else {
+            throw new IllegalArgumentException("Ano de lançamento inválido.");
+        }
     }
 
     public void setDesenvolvedora(String desenvolvedora) {
         this.desenvolvedora = desenvolvedora;
     }
 
-    public String getPublicadora() {
-        return publicadora;
-    }
-
     public void setPublicadora(String publicadora) {
         this.publicadora = publicadora;
-    }
-
-    public List<Plataforma> getPlataformas() {
-        return plataformas;
     }
 
     public void setPlataformas(List<Plataforma> plataformas) {
@@ -73,4 +84,3 @@ public class Jogo {
 }
 
 
-//jogo(id, titulo, ano_lancamento, desenvolvedora, publicadora

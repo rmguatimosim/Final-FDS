@@ -43,17 +43,16 @@ public class Jogador {
         setCpf(cpf);
         setDataNascimento(dataNasc);
     }
-    //construtor para buscar do banco
+    //construtor para retorno de busca do banco
     public Jogador(int id, String nome, String email, String cpf, LocalDate dataNasc){
         this(nome, email, cpf, dataNasc);
         setId(id);
     }
 
 
-    //funções de validação
-
+    //utilidades
     //função que verifica se CPF informado é válido.
-    public boolean validaCPF(String cpf) {
+    private boolean validaCPF(String cpf) {
         boolean b = true;
         if(cpf.length() != 11) b = false;
         else {
@@ -88,13 +87,13 @@ public class Jogador {
         return b;
     }
     //função que verifica se nome não está em branco e é válido
-    public boolean validaNome(String nome) {
+    private boolean validaNome(String nome) {
         Pattern pattern = Pattern.compile("^[a-zA-Z\\s]+$");
         Matcher matcher = pattern.matcher(nome);
         return matcher.matches();
     }
     //função que verifica se email é válido
-    public boolean validaEmail(String email){
+    private boolean validaEmail(String email){
         if(!email.contains("@") || email.isBlank()){
             return false;
         }
@@ -105,12 +104,17 @@ public class Jogador {
         return true;
     }
     //função que verifica se data de nascimento é válida
-    public boolean validaDataNasc(LocalDate dataNascimento){
+    private boolean validaDataNasc(LocalDate dataNascimento){
         if(dataNascimento.isAfter(LocalDate.now()) || dataNascimento.getYear()<1900){
             return false;
         }
         return true;
     }
+    //função para cálculo de idade baseado na data de nascimento
+    public int calculaIdade(){
+        return LocalDate.now().getYear() - this.dataNascimento.getYear();
+    }
+
     //Getters
     public int getId() {return id;}
     public String getNome() {return nome;}
@@ -142,7 +146,6 @@ public class Jogador {
         else{
             throw new IllegalArgumentException("Email inválido");
         }
-
     }
 
     public void setCpf(String cpf) {

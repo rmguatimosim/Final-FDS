@@ -30,56 +30,72 @@ public class Plataforma {
     private List<Jogo> jogosDisponiveis;
 
 
-    public int getId() {
-        return id;
+    //construtores
+    public Plataforma(){
+
+    }
+    public Plataforma(String nome, TipoPlataforma tipo, String proprietaria, String email){
+        setNome(nome);
+        setTipo(tipo);
+        setProprietaria(proprietaria);
+        setEmail(email);
+    }
+    //construtor para retorno de busca no banco de dados
+    public Plataforma(int id, String nome, TipoPlataforma tipo, String proprietaria, String email){
+        this(nome, tipo, proprietaria, email);
+        setId(id);
     }
 
+    //funções de validação
+    //valida se email é válido
+    private boolean validaEmail(String email){
+        if(!email.contains("@") || email.isBlank()){
+            return false;
+        }
+        String afterAt = email.substring(email.indexOf("@"));
+        if(!afterAt.contains(".") || afterAt.endsWith(".")){
+            return false;
+        }
+        return true;
+    }
+
+    //getters
+    public int getId() {return id;}
+    public String getNome() {return nome;}
+    public TipoPlataforma getTipo() {return tipo;}
+    public String getProprietaria() {return proprietaria;}
+    public String getEmail() {return email;}
+    public List<Jogador> getJogadores() {return jogadores;}
+    public List<Jogo> getJogosDisponiveis() {return jogosDisponiveis;}
+
+    //setters
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public TipoPlataforma getTipo() {
-        return tipo;
-    }
-
     public void setTipo(TipoPlataforma tipo) {
         this.tipo = tipo;
-    }
-
-    public String getProprietaria() {
-        return proprietaria;
     }
 
     public void setProprietaria(String proprietaria) {
         this.proprietaria = proprietaria;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public List<Jogador> getJogadores() {
-        return jogadores;
+        if(validaEmail(email)){
+            this.email = email;
+        }
+        else{
+            throw new IllegalArgumentException("Email inválido");
+        }
     }
 
     public void setJogadores(List<Jogador> jogadores) {
         this.jogadores = jogadores;
-    }
-
-    public List<Jogo> getJogosDisponiveis() {
-        return jogosDisponiveis;
     }
 
     public void setJogosDisponiveis(List<Jogo> jogosDisponiveis) {
@@ -87,4 +103,4 @@ public class Plataforma {
     }
 }
 
-//plataforma(id, nome, tipo, proprietária, email
+
