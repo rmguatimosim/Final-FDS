@@ -1,17 +1,17 @@
 package br.edu.ifrs.persistence;
 
-import br.edu.ifrs.model.Jogador;
+import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Plataforma;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 
 import java.util.List;
 
-public class PlataformaDao extends daoJPA implements dao<Plataforma>{
+public class PlataformaDao implements dao<Plataforma>{
 
     private EntityManager manager;
-    PlataformaDao(){
-        this.manager = emFac.createEntityManager();
+    public PlataformaDao(String unit){
+        this.manager = ConnectionBD.connection(unit).createEntityManager();
     }
 
     @Override
@@ -30,9 +30,16 @@ public class PlataformaDao extends daoJPA implements dao<Plataforma>{
 
     @Override
     public void delete(int id) {
-        manager.getTransaction().begin();
-        manager.remove(manager.getReference(Plataforma.class, id));
-        manager.getTransaction().commit();
+        Plataforma p = manager.find(Plataforma.class, id);
+        if(p!=null){
+            manager.getTransaction().begin();
+            manager.remove(p);
+            manager.getTransaction().commit();
+        }
+        else{
+            throw new IllegalArgumentException("Não foi encontrada plataforma com ID " + id);
+        }
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package br.edu.ifrs.persistence;
 
+import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Jogo;
 import jakarta.persistence.EntityManager;
@@ -7,12 +8,12 @@ import jakarta.persistence.Query;
 
 import java.util.List;
 
-public class JogoDao extends daoJPA implements dao<Jogo>{
+public class JogoDao implements dao<Jogo>{
 
     private EntityManager manager;
 
-    JogoDao(){
-        this.manager = emFac.createEntityManager();
+    public JogoDao(String unit){
+        this.manager = ConnectionBD.connection(unit).createEntityManager();
     }
 
     @Override
@@ -31,9 +32,16 @@ public class JogoDao extends daoJPA implements dao<Jogo>{
 
     @Override
     public void delete(int id) {
-        manager.getTransaction().begin();
-        manager.remove(manager.getReference(Jogo.class, id));
-        manager.getTransaction().commit();
+        Jogo j = manager.find(Jogo.class, id);
+        if(j != null){
+            manager.getTransaction().begin();
+            manager.remove(j);
+            manager.getTransaction().commit();
+        }
+        else{
+            throw new IllegalArgumentException("Não foi encontrado jogo com ID " + id);
+        }
+
     }
 
     @Override
