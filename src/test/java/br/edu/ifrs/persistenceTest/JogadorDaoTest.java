@@ -1,5 +1,6 @@
 package br.edu.ifrs.persistenceTest;
 
+import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.persistence.JogadorDao;
 
@@ -19,7 +20,7 @@ public class JogadorDaoTest {
     //inicializa o JogadorDao no banco de testes
     @BeforeEach
     public void init(){
-        jdao = new JogadorDao("testUnit");
+        jdao = new JogadorDao(ConnectionBD.connection("testUnit"));
         j = new Jogador("Rafael", "rafael@gmail.com", "01658023080", LocalDate.of(1990,7,6));
     }
 

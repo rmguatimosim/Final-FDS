@@ -1,9 +1,9 @@
 package br.edu.ifrs.persistence;
 
 import br.edu.ifrs.connectionFactory.ConnectionBD;
-import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Jogo;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 
 import java.util.List;
@@ -12,8 +12,8 @@ public class JogoDao implements dao<Jogo>{
 
     private EntityManager manager;
 
-    public JogoDao(String unit){
-        this.manager = ConnectionBD.connection(unit).createEntityManager();
+    public JogoDao(EntityManagerFactory em){
+        this.manager = em.createEntityManager();
     }
 
     @Override

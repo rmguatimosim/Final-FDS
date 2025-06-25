@@ -3,15 +3,16 @@ package br.edu.ifrs.persistence;
 import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Plataforma;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 
 import java.util.List;
 
 public class PlataformaDao implements dao<Plataforma>{
 
-    private EntityManager manager;
-    public PlataformaDao(String unit){
-        this.manager = ConnectionBD.connection(unit).createEntityManager();
+    private final EntityManager manager;
+    public PlataformaDao(EntityManagerFactory em){
+        this.manager = em.createEntityManager();
     }
 
     @Override

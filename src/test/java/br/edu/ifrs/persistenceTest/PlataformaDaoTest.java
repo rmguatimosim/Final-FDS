@@ -1,5 +1,6 @@
 package br.edu.ifrs.persistenceTest;
 
+import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Plataforma;
 import br.edu.ifrs.model.TipoPlataforma;
@@ -19,7 +20,7 @@ public class PlataformaDaoTest {
 
     @BeforeEach
     public void init(){
-        pdao = new PlataformaDao("testUnit");
+        pdao = new PlataformaDao(ConnectionBD.connection("testUnit"));
         p = new Plataforma("PlayStation", TipoPlataforma.CONSOLE, "Sony", "sony@gmail.com");
     }
 

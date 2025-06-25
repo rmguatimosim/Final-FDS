@@ -1,5 +1,6 @@
 package br.edu.ifrs.persistenceTest;
 
+import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Jogo;
 import br.edu.ifrs.persistence.JogoDao;
@@ -18,7 +19,7 @@ public class JogoDaoTest {
 
     @BeforeEach
     public void init(){
-        jdao = new JogoDao("testUnit");
+        jdao = new JogoDao(ConnectionBD.connection("testUnit"));
         j = new Jogo("Elden Ring", 2022, "From Software", "Bandai Namco");
     }
 
