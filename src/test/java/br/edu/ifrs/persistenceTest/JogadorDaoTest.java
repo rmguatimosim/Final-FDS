@@ -4,6 +4,7 @@ import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.persistence.JogadorDao;
 
+import jakarta.persistence.EntityManager;
 import org.hibernate.PropertyValueException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +17,12 @@ import java.util.List;
 public class JogadorDaoTest {
     JogadorDao jdao;
     Jogador j;
+    EntityManager em = ConnectionBD.connection("testUnit");
 
     //inicializa o JogadorDao no banco de testes
     @BeforeEach
     public void init(){
-        jdao = new JogadorDao(ConnectionBD.connection("testUnit"));
+        jdao = new JogadorDao(em);
         j = new Jogador("Rafael", "rafael@gmail.com", "01658023080", LocalDate.of(1990,7,6));
     }
 

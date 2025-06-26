@@ -4,6 +4,7 @@ import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Jogo;
 import br.edu.ifrs.persistence.JogoDao;
+import jakarta.persistence.EntityManager;
 import org.hibernate.PropertyValueException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +15,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class JogoDaoTest {
+    EntityManager em = ConnectionBD.connection("testUnit");
     JogoDao jdao;
     Jogo j;
 
     @BeforeEach
     public void init(){
-        jdao = new JogoDao(ConnectionBD.connection("testUnit"));
+        jdao = new JogoDao(em);
         j = new Jogo("Elden Ring", 2022, "From Software", "Bandai Namco");
     }
 

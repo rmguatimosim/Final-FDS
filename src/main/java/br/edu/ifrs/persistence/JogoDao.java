@@ -12,8 +12,8 @@ public class JogoDao implements dao<Jogo>{
 
     private EntityManager manager;
 
-    public JogoDao(EntityManagerFactory em){
-        this.manager = em.createEntityManager();
+    public JogoDao(EntityManager em){
+        this.manager = em;
     }
 
     @Override

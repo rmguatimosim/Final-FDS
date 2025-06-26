@@ -11,8 +11,8 @@ import java.util.List;
 public class PlataformaDao implements dao<Plataforma>{
 
     private final EntityManager manager;
-    public PlataformaDao(EntityManagerFactory em){
-        this.manager = em.createEntityManager();
+    public PlataformaDao(EntityManager em){
+        this.manager = em;
     }
 
     @Override

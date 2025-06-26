@@ -1,26 +1,26 @@
 package br.edu.ifrs.persistenceTest;
 
 import br.edu.ifrs.connectionFactory.ConnectionBD;
-import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Plataforma;
 import br.edu.ifrs.model.TipoPlataforma;
 import br.edu.ifrs.persistence.PlataformaDao;
+import jakarta.persistence.EntityManager;
 import org.hibernate.PropertyValueException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class PlataformaDaoTest {
+    EntityManager em = ConnectionBD.connection("testUnit");
     PlataformaDao pdao;
     Plataforma p;
 
     @BeforeEach
     public void init(){
-        pdao = new PlataformaDao(ConnectionBD.connection("testUnit"));
+        pdao = new PlataformaDao(em);
         p = new Plataforma("PlayStation", TipoPlataforma.CONSOLE, "Sony", "sony@gmail.com");
     }
 

@@ -12,8 +12,8 @@ public class JogadorDao implements dao<Jogador>{
 
     private final EntityManager manager;
 
-    public JogadorDao(EntityManagerFactory em){
-        this.manager = em.createEntityManager();
+    public JogadorDao(EntityManager em){
+        this.manager = em;
     }
 
     @Override
@@ -41,7 +41,6 @@ public class JogadorDao implements dao<Jogador>{
         else{
             throw new IllegalArgumentException("Não foi encontrado jogador com ID " + id);
         }
-
     }
 
     @Override

@@ -1,7 +1,10 @@
 package br.edu.ifrs.persistenceTest;
 
-import br.edu.ifrs.model.Jogador;
-import br.edu.ifrs.persistence.JogadorDao;
+import br.edu.ifrs.model.Jogo;
+import br.edu.ifrs.model.Plataforma;
+import br.edu.ifrs.model.TipoPlataforma;
+import br.edu.ifrs.persistence.JogoDao;
+import br.edu.ifrs.persistence.PlataformaDao;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import org.junit.jupiter.api.Assertions;
@@ -9,55 +12,55 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class JogadorDaoMockTest {
+public class PlataformaDaoMockTest {
     private EntityManager em;
     private EntityTransaction et;
-    JogadorDao jdao;
-    Jogador j;
+    PlataformaDao pdao;
+    Plataforma p;
 
     @BeforeEach
     public void init() {
-        j = new Jogador("Rafael", "rafael@gmail.com", "01658023080", LocalDate.of(1990,7,6));
+        p = p = new Plataforma("PlayStation", TipoPlataforma.CONSOLE, "Sony", "sony@gmail.com");
         em = mock(EntityManager.class);
         et = mock(EntityTransaction.class);
         when(em.getTransaction()).thenReturn(et);
-
-        jdao = new JogadorDao(em);
-
+        pdao = new PlataformaDao(em);
     }
 
     @Test
     @DisplayName("teste de insert com EM mockado")
     public void testInsert() {
-        jdao.insert(j);
+        pdao.insert(p);
         verify(et).begin();
-        verify(em).persist(j);
+        verify(em).persist(p);
         verify(et).commit();
     }
 
     @Test
     @DisplayName("teste de delete com EM mockado")
     public void testDelete() {
-        when(em.find(Jogador.class, 2)).thenReturn(j);
-        j.setId(2);
-        jdao.delete(2);
+        when(em.find(Plataforma.class, 2)).thenReturn(p);
+        p.setId(2);
+        pdao.delete(2);
         verify(et).begin();
-        verify(em).remove(j);
+        verify(em).remove(p);
         verify(et).commit();
     }
 
     @Test
     @DisplayName("teste de throw da função Delete")
     public void testDeleteThrow() {
-        when(em.find(Jogador.class, 99)).thenReturn(null);
+        when(em.find(Plataforma.class, 99)).thenReturn(null);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            jdao.delete(99);
+            pdao.delete(99);
         });
-        Assertions.assertEquals("Não foi encontrado jogador com ID 99", thrown.getMessage());
+        Assertions.assertEquals("Não foi encontrada plataforma com ID 99", thrown.getMessage());
         verify(et, never()).begin();
         verify(em, never()).remove(any());
         verify(et, never()).commit();
@@ -66,21 +69,18 @@ public class JogadorDaoMockTest {
     @Test
     @DisplayName("teste de update com EM mockado")
     public void testUpdate (){
-        jdao.update(j);
+        pdao.update(p);
         verify(et).begin();
-        verify(em).merge(j);
+        verify(em).merge(p);
         verify(et).commit();
     }
 
     @Test
     @DisplayName("teste de find com EM mockado")
     public void testFind(){
-        when(em.find(Jogador.class, 2)).thenReturn(j);
-        Jogador novo = jdao.find(2);
-        Assertions.assertEquals(j, novo);
+        when(em.find(Plataforma.class, 2)).thenReturn(p);
+        Plataforma novo = pdao.find(2);
+        Assertions.assertEquals(p, novo);
     }
 
 }
-
-
-
