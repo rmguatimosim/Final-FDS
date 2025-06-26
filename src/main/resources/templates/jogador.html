@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Jogadores</title>
+    <style>
+        body {
+            margin-top: 60px;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        #cadastroModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            width: 400px;
+            margin: 10% auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<h1 style="text-align: center;">Jogadores</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Opções</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="jogador : ${jogadores}" onclick="this.classList.toggle('selecionado')">
+        <td th:text="${jogador.id}">ID</td>
+        <td th:text="${jogador.nome}">Nome</td>
+        <td>
+            <button th:onclick="'location.href=\'/jogador/' + ${jogador.id} + '/jogos\''">
+                Incluir Jogos
+            </button>
+            <button th:onclick="'location.href=\'/jogador/' + ${jogador.id} + '/plataformas\''">
+                Plataforma
+            </button>
+            <button onclick="editarJogador(this)" th:attr="data-id=${jogador.id},
+                     data-nome=${jogador.nome},
+                     data-email=${jogador.email},
+                     data-cpf=${jogador.cpf},
+                     data-nascimento=${jogador.dataNascimento}">
+                Alterar
+            </button>
+
+            <form th:action="@{'/jogador/deletar/' + ${jogador.id}}" method="post" style="display: inline;">
+                <button type="submit" onclick="return confirm('Tem certeza que deseja excluir este jogador?')">
+                    Excluir
+                </button>
+            </form>
+        </td>
+
+    </tr>
+    </tbody>
+</table>
+
+<div style="text-align: center;">
+    <button onclick="abrirModalCadastro()">Cadastrar Novo Jogador</button>
+
+</div>
+
+<div id="jogadorModal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content">
+        <div th:if="${erroModal}" style="color: red; margin-bottom: 10px;">
+            <p th:text="${erroModal}"></p>
+        </div>
+        <h2 id="modalTitulo" th:text="${jogadorTemp?.id != null} ? 'Editar Jogador' : 'Novo Jogador'">Novo Jogador</h2>
+        <form id="formJogador" th:action="@{/jogador/salvar}" method="post">
+            <input type="hidden" name="id" id="formId" th:value="${form?.id}">
+            <label>Nome:</label><br>
+            <input type="text" name="nome" id="formNome" required th:value="${form?.nome}"><br><br>
+            <label>E-mail:</label><br>
+            <input type="text" name="email" id="formEmail" required th:value="${form?.email}"><br><br>
+            <label>CPF:</label><br>
+            <input type="text" name="cpf" id="formCpf" required th:value="${form?.cpf}"><br><br>
+            <label>Data de Nascimento:</label><br>
+            <input type="date" name="dataNascimento" id="formNascimento" required th:value="${form?.dataNascimento}"><br><br>
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="document.getElementById('jogadorModal').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.onclick = function(event) {
+        let modal = document.getElementById('cadastroModal');
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+<script>
+    function abrirModalCadastro() {
+        document.getElementById('formJogador').reset();
+        document.getElementById('formId').value = '';
+        document.getElementById('modalTitulo').innerText = 'Novo Jogador';
+        document.getElementById('jogadorModal').style.display = 'block';
+    }
+</script>
+<script>
+    function editarJogador(botao) {
+        document.getElementById('formId').value = botao.getAttribute('data-id');
+        document.getElementById('formNome').value = botao.getAttribute('data-nome');
+        document.getElementById('formEmail').value = botao.getAttribute('data-email');
+        document.getElementById('formCpf').value = botao.getAttribute('data-cpf');
+        document.getElementById('formNascimento').value = botao.getAttribute('data-nascimento');
+        document.getElementById('modalTitulo').innerText = 'Editar Jogador';
+        document.getElementById('jogadorModal').style.display = 'block';
+    }
+</script>
+<div th:if="${abrirModal}">
+    <script>
+        window.onload = function () {
+            document.getElementById('jogadorModal').style.display = 'block';
+        };
+    </script>
+</div>
+
+
+
+</body>
+</html>

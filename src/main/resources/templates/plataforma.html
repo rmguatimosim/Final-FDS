@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Plataformas</title>
+    <style>
+        body {
+            margin-top: 60px;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        #plataformaModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            width: 400px;
+            margin: 10% auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<h1 style="text-align: center;">Plataformas</h1>
+
+
+<div th:if="${mensagem}" style="color: green; text-align: center;">
+    <p th:text="${mensagem}"></p>
+</div>
+<div th:if="${erro}" style="color: red; text-align: center;">
+    <p th:text="${erro}"></p>
+</div>
+
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Opções</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="plataforma : ${plataformas}">
+        <td th:text="${plataforma.id}">ID</td>
+        <td th:text="${plataforma.nome}">Nome</td>
+        <td>
+            <button th:onclick="'location.href=\'/plataforma/' + ${plataforma.id} + '/jogos\''">Jogos</button>
+            <button th:onclick="'location.href=\'/plataforma/' + ${plataforma.id} + '/jogadores\''">Jogadores</button>
+            <button onclick="editarPlataforma(this)"
+                    th:attr="data-id=${plataforma.id},
+                                 data-nome=${plataforma.nome},
+                                 data-tipo=${plataforma.tipo},
+                                 data-proprietaria=${plataforma.proprietaria},
+                                 data-email=${plataforma.email}">
+                Alterar
+            </button>
+            <form th:action="@{'/plataforma/deletar/' + ${plataforma.id}}" method="post" style="display: inline;">
+                <button type="submit" onclick="return confirm('Excluir esta plataforma?')">Excluir</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<div style="text-align: center;">
+    <button onclick="abrirModalCadastroPlataforma()">Cadastrar Nova Plataforma</button>
+</div>
+
+
+<div id="plataformaModal">
+    <div class="modal-content">
+        <div th:if="${erroModal}" style="color: red; margin-bottom: 10px;">
+            <p th:text="${erroModal}"></p>
+        </div>
+        <h2 id="modalTituloPlataforma" th:text="${form?.id != null} ? 'Editar Plataforma' : 'Nova Plataforma'">Nova Plataforma</h2>
+        <form id="formPlataforma" th:action="@{/plataforma/salvar}" method="post">
+            <input type="hidden" name="id" id="formId" th:value="${form?.id}">
+            <label>Nome:</label><br>
+            <input type="text" name="nome" id="formNome" required th:value="${form?.nome}"><br><br>
+            <label>Tipo:</label><br>
+            <select name="tipo" id="formTipo" required>
+                <option value="">Selecione...</option>
+                <option value="CONSOLE" th:selected="${form?.tipo == 'CONSOLE'}">Console</option>
+                <option value="PC" th:selected="${form?.tipo == 'PC'}">PC</option>
+                <option value="MOBILE" th:selected="${form?.tipo == 'MOBILE'}">Mobile</option>
+            </select><br><br>
+            <label>Proprietária:</label><br>
+            <input type="text" name="proprietaria" id="formProprietaria" required th:value="${form?.proprietaria}"><br><br>
+            <label>Email:</label><br>
+            <input type="email" name="email" id="formEmail" required th:value="${form?.email}"><br><br>
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="document.getElementById('plataformaModal').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function abrirModalCadastroPlataforma() {
+        document.getElementById('formPlataforma').reset();
+        document.getElementById('formId').value = '';
+        document.getElementById('modalTituloPlataforma').innerText = 'Nova Plataforma';
+        document.getElementById('plataformaModal').style.display = 'block';
+    }
+
+    function editarPlataforma(botao) {
+        document.getElementById('formId').value = botao.getAttribute('data-id');
+        document.getElementById('formNome').value = botao.getAttribute('data-nome');
+        document.getElementById('formTipo').value = botao.getAttribute('data-tipo');
+        document.getElementById('formProprietaria').value = botao.getAttribute('data-proprietaria');
+        document.getElementById('formEmail').value = botao.getAttribute('data-email');
+        document.getElementById('modalTituloPlataforma').innerText = 'Editar Plataforma';
+        document.getElementById('plataformaModal').style.display = 'block';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('plataformaModal');
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+</script>
+
+<div th:if="${abrirModal}">
+    <script>
+        window.onload = function () {
+            document.getElementById('plataformaModal').style.display = 'block';
+        };
+    </script>
+</div>
+
+</body>
+</html>

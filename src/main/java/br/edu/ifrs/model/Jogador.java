@@ -33,6 +33,7 @@ public class Jogador {
         inverseJoinColumns = @JoinColumn(name="idJogo"))
     private List<Jogo> jogos;
 
+
     //construtores
     public Jogador(){
 
@@ -47,6 +48,7 @@ public class Jogador {
     public Jogador(int id, String nome, String email, String cpf, LocalDate dataNasc){
         this(nome, email, cpf, dataNasc);
         setId(id);
+
     }
 
 
@@ -88,7 +90,7 @@ public class Jogador {
     }
     //função que verifica se nome não está em branco e é válido
     private boolean validaNome(String nome) {
-        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]+$");
+        Pattern pattern = Pattern.compile("^[\\p{L}\\s]+$");
         Matcher matcher = pattern.matcher(nome);
         return matcher.matches();
     }
@@ -122,8 +124,8 @@ public class Jogador {
     public String getCpf() {return cpf;}
     public LocalDate getDataNascimento() {return dataNascimento;}
     public Plataforma getPlataforma() {return plataforma;}
-    public void setPlataforma(Plataforma plataforma) {this.plataforma = plataforma;}
     public List<Jogo> getJogos() {return jogos;}
+    public int getIdade(){return calculaIdade();};
 
     //setters
     public void setId(int id) {
@@ -166,9 +168,12 @@ public class Jogador {
         }
     }
 
+    public void setPlataforma(Plataforma plataforma) {this.plataforma = plataforma;}
+
     public void setJogos(List<Jogo> jogos) {
         this.jogos = jogos;
     }
+
 }
 
 

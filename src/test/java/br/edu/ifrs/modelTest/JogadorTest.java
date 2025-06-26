@@ -13,7 +13,7 @@ public class JogadorTest {
     @Test
     @DisplayName("Teste da função setNome")
     public void testSetNome(){
-        String nome = "Rafael";
+        String nome = "Zé Gordino";
         jo.setNome(nome);
         Assertions.assertEquals(nome, jo.getNome());
     }
@@ -93,6 +93,14 @@ public class JogadorTest {
         LocalDate data = LocalDate.of(1990,7,6);
         jo.setDataNascimento(data);
         Assertions.assertEquals(35, jo.calculaIdade());
+    }
+
+    @Test
+    @DisplayName("teste de idade no objeto")
+    public void testIdadeObj(){
+        LocalDate data = LocalDate.of(1990,7,6);
+        jo.setDataNascimento(data);
+        Assertions.assertEquals(35, jo.getIdade());
     }
 
 }

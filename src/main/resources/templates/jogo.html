@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Jogos</title>
+    <style>
+        body {
+            margin-top: 60px;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        #jogoModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            width: 400px;
+            margin: 10% auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<h1 style="text-align: center;">Jogos</h1>
+
+<div th:if="${mensagem}" style="color: green; text-align: center;">
+    <p th:text="${mensagem}"></p>
+</div>
+<div th:if="${erro}" style="color: red; text-align: center;">
+    <p th:text="${erro}"></p>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Opções</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="jogo : ${jogos}">
+        <td th:text="${jogo.id}">ID</td>
+        <td th:text="${jogo.titulo}">Título</td>
+        <td>
+            <button th:onclick="'location.href=\'/jogo/' + ${jogo.id} + '/plataformas\''">
+                Plataforma
+            </button>
+            <button onclick="editarJogo(this)"
+                    th:attr="data-id=${jogo.id},
+                                 data-titulo=${jogo.titulo},
+                                 data-anoLancamento=${jogo.anoLancamento},
+                                 data-desenvolvedora=${jogo.desenvolvedora},
+                                 data-publicadora=${jogo.publicadora}">
+                Alterar
+            </button>
+            <form th:action="@{'/jogo/deletar/' + ${jogo.id}}" method="post" style="display: inline;">
+                <button type="submit" onclick="return confirm('Excluir este jogo?')">Excluir</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div style="text-align: center;">
+    <button onclick="abrirModalCadastroJogo()">Cadastrar Novo Jogo</button>
+</div>
+
+<div id="jogoModal">
+    <div class="modal-content">
+        <div th:if="${erroModal}" style="color: red; margin-bottom: 10px;">
+            <p th:text="${erroModal}"></p>
+        </div>
+        <h2 id="modalTituloJogo" th:text="${form?.id != null} ? 'Editar Jogo' : 'Novo Jogo'">Novo Jogo</h2>
+        <form id="formJogo" th:action="@{/jogo/salvar}" method="post">
+            <input type="hidden" name="id" id="formJogoId" th:value="${form?.id}">
+            <label>Título:</label><br>
+            <input type="text" name="titulo" id="formTitulo" required th:value="${form?.titulo}"><br><br>
+            <label>Ano de Lancamento:</label><br>
+            <input type="number" size="4" name="anoLancamento" id="formAnoLancamento" required th:value="${form?.anoLancamento}"><br><br>
+            <label>Desenvolvedora:</label><br>
+            <input type="text" name="desenvolvedora" id="formDesenvolvedora" required th:value="${form?.desenvolvedora}"><br><br>
+            <label>Publicadora:</label><br>
+            <input type="text" name="publicadora" id="formPublicadora" required th:value="${form?.publicadora}"><br><br>
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="document.getElementById('jogoModal').style.display='none'">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- ✅ Scripts -->
+<script>
+    function abrirModalCadastroJogo() {
+        document.getElementById('formJogo').reset();
+        document.getElementById('formJogoId').value = '';
+        document.getElementById('modalTituloJogo').innerText = 'Novo Jogo';
+        document.getElementById('jogoModal').style.display = 'block';
+    }
+
+    function editarJogo(botao) {
+        document.getElementById('formJogoId').value = botao.getAttribute('data-id');
+        document.getElementById('formTitulo').value = botao.getAttribute('data-titulo');
+        document.getElementById('formAnoLancamento').value = botao.getAttribute('data-anoLancamento');
+        document.getElementById('formDesenvolvedora').value = botao.getAttribute('data-desenvolvedora');
+        document.getElementById('formPublicadora').value = botao.getAttribute('data-publicadora');
+        document.getElementById('modalTituloJogo').innerText = 'Editar Jogo';
+        document.getElementById('jogoModal').style.display = 'block';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('jogoModal');
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+</script>
+
+<div th:if="${abrirModal}">
+    <script>
+        window.onload = function () {
+            document.getElementById('jogoModal').style.display = 'block';
+        };
+    </script>
+</div>
+
+</body>
+</html>
