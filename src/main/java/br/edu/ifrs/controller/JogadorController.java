@@ -8,6 +8,7 @@ import br.edu.ifrs.model.Jogo;
 import br.edu.ifrs.persistence.JogadorDao;
 import br.edu.ifrs.persistence.JogoDao;
 import br.edu.ifrs.persistence.PlataformaDao;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -108,6 +109,14 @@ public class JogadorController {
 
         }
         return "redirect:/jogador";
+    }
+    @DeleteMapping("/jogador/{jogadorId}/remover-jogo/{jogoId}")
+    @ResponseBody
+    public ResponseEntity<?> removerJogo(@PathVariable Long jogadorId, @PathVariable Long jogoId) {
+        Jogador j = jdao.find(Math.toIntExact(jogadorId));
+        j.getJogos().remove(jodao.find(Math.toIntExact(jogoId)));
+        jdao.update(j);
+        return ResponseEntity.ok().build();
     }
 
 

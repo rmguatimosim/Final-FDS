@@ -239,11 +239,12 @@
                     lista.innerHTML = "<li>Nenhum jogo associado.</li>";
                 } else {
                     jogos.forEach(jogo => {
-                        const li = document.createElement("li");
-                        li.textContent = jogo.nome + " (" + jogo.anoLancamento + ")";
+                        const li = document.createElement("li")
+                        li.innerHTML = `${jogo.nome} (${jogo.anoLancamento})
+                        <button onclick="removerJogo(${jogo.id}, ${jogadorId})">Remover</button>`;
                         lista.appendChild(li);
                     });
-                }
+                                    }
             })
             .catch(() => {
                 lista.innerHTML = "<li>Erro ao carregar jogos.</li>";
@@ -254,6 +255,19 @@
 
     function fecharModalJogos() {
         document.getElementById("jogosModal").style.display = "none";
+    }
+    function removerJogo(jogoId, jogadorId) {
+        if (!confirm("Deseja realmente remover este jogo do jogador?")) return;
+
+        fetch(`/jogador/${jogadorId}/remover-jogo/${jogoId}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (!response.ok) throw new Error()
+            // Recarrega o modal para refletir a mudança
+            abrirModalJogos(jogadorId)
+        })
+        .catch(() => alert("Erro ao remover jogo."))
     }
 </script>
 

@@ -64,4 +64,7 @@ public class JogadorDao implements dao<Jogador>{
                 .setParameter("plataformaId", plataformaId)
                 .getResultList();
     }
+
+
+
 }
