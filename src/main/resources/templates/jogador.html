@@ -36,6 +36,29 @@
             margin: 10% auto;
             border-radius: 5px;
         }
+        .botao-incluir {
+            background-color: #4CAF50; /* verde */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .botao-alterar {
+            background-color: #2196F3; /* azul */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .botao-incluir:hover,
+        .botao-alterar:hover
+        {
+            filter: brightness
+        }
     </style>
 </head>
 <body>
@@ -43,11 +66,18 @@
 
 <h1 style="text-align: center;">Jogadores</h1>
 
+<div th:if="${mensagem}" style="color: green; text-align: center; margin: 10px;">
+    <p th:text="${mensagem}"></p>
+</div>
+<div th:if="${erro}" style="color: red; text-align: center;">
+    <p th:text="${erro}"></p>
+</div>
 <table>
     <thead>
     <tr>
         <th>ID</th>
         <th>Nome</th>
+        <th>Plataforma</th>
         <th>Opções</th>
 
     </tr>
@@ -57,12 +87,18 @@
         <td th:text="${jogador.id}">ID</td>
         <td th:text="${jogador.nome}">Nome</td>
         <td>
-            <button th:onclick="'location.href=\'/jogador/' + ${jogador.id} + '/jogos\''">
-                Incluir Jogos
+            <span th:if="${jogador.plataforma != null}" th:text="${jogador.plataforma.nome}">Plataforma</span>
+
+            <button th:onclick="'abrirModalPlataforma(' + ${jogador.id} + ')'"
+                    th:text="${jogador.plataforma == null} ? 'Incluir Plataforma' : 'Alterar Plataforma'"
+                    th:class="${jogador.plataforma == null} ? 'botao-incluir' : 'botao-alterar'">
+                Botão Plataforma
             </button>
-            <button th:onclick="'location.href=\'/jogador/' + ${jogador.id} + '/plataformas\''">
-                Plataforma
-            </button>
+        </td>
+
+
+        <td>
+            <button type="button" th:onclick="'abrirModalJogos(' + ${jogador.id} + ')'">Jogos</button>
             <button onclick="editarJogador(this)" th:attr="data-id=${jogador.id},
                      data-nome=${jogador.nome},
                      data-email=${jogador.email},
@@ -108,6 +144,36 @@
         </form>
     </div>
 </div>
+<div id="modalPlataforma" style="display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content">
+        <h3>Selecionar Plataforma</h3>
+        <form id="formPlataforma" method="post" th:action="@{/jogador/atribuir-plataforma}">
+            <input type="hidden" name="jogadorId" id="jogadorIdSelecionado">
+            <select name="plataformaId" required>
+                <option th:each="plataforma : ${plataformas}" th:value="${plataforma.id}" th:text="${plataforma.nome}">Plataforma</option>
+            </select><br><br>
+            <button type="submit">Salvar</button>
+            <button type="button" onclick="fecharModalPlataforma()">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<div id="jogosModal" style="display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3>Jogos do Jogador</h3>
+        <ul id="listaJogos"></ul>
+
+        <form id="formIncluirJogo" method="post" th:action="@{/jogador/incluir-jogo}">
+            <input type="hidden" name="jogadorId" id="jogadorIdParaIncluir">
+            <select name="jogoId" id="jogoSelect">
+                <option th:each="jogo : ${jogos}" th:value="${jogo.id}" th:text="${jogo.titulo}">Jogo</option>
+            </select>
+            <button type="submit">Incluir</button>
+        </form>
+
+        <button onclick="fecharModalJogos()">Fechar</button>
+    </div>
+</div>
 
 <script>
     window.onclick = function(event) {
@@ -143,7 +209,53 @@
         };
     </script>
 </div>
+<script>
+    function abrirModalPlataforma(jogadorId) {
+        document.getElementById('jogadorIdSelecionado').value = jogadorId;
+        document.getElementById('modalPlataforma').style.display = 'block';
+    }
 
+    function fecharModalPlataforma() {
+        document.getElementById('modalPlataforma').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.id === "modalPlataforma") {
+            fecharModalPlataforma();
+        }
+    }
+</script>
+<script>
+    function abrirModalJogos(jogadorId) {
+        document.getElementById("jogadorIdParaIncluir").value = jogadorId;
+        const lista = document.getElementById("listaJogos");
+        lista.innerHTML = "<li>Carregando...</li>";
+
+        fetch(`/jogador/${jogadorId}/jogos`)
+            .then(res => res.json())
+            .then(jogos => {
+                lista.innerHTML = "";
+                if (jogos.length === 0) {
+                    lista.innerHTML = "<li>Nenhum jogo associado.</li>";
+                } else {
+                    jogos.forEach(jogo => {
+                        const li = document.createElement("li");
+                        li.textContent = jogo.nome + " (" + jogo.anoLancamento + ")";
+                        lista.appendChild(li);
+                    });
+                }
+            })
+            .catch(() => {
+                lista.innerHTML = "<li>Erro ao carregar jogos.</li>";
+            });
+
+        document.getElementById("jogosModal").style.display = "block";
+    }
+
+    function fecharModalJogos() {
+        document.getElementById("jogosModal").style.display = "none";
+    }
+</script>
 
 
 </body>

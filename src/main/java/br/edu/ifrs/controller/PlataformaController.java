@@ -2,9 +2,12 @@ package br.edu.ifrs.controller;
 
 
 import br.edu.ifrs.connectionFactory.ConnectionBD;
+import br.edu.ifrs.form.JogadorDTO;
 import br.edu.ifrs.form.PlataformaForm;
+import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Plataforma;
 import br.edu.ifrs.model.TipoPlataforma;
+import br.edu.ifrs.persistence.JogadorDao;
 import br.edu.ifrs.persistence.PlataformaDao;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +19,7 @@ import java.util.List;
 @Controller
 public class PlataformaController {
     private final PlataformaDao pdao = new PlataformaDao(ConnectionBD.connection("prodUnit"));
+    private final JogadorDao jdao = new JogadorDao(ConnectionBD.connection("prodUnit"));
 
     @GetMapping("/plataforma")
     public String listarPlataformas(Model model){
@@ -53,14 +57,23 @@ public class PlataformaController {
     }
 
     @PostMapping("/plataforma/deletar/{id}")
-    public String deletarPlataforma(@PathVariable int id, RedirectAttributes redirectAttributes) {
+    public String deletarPlataforma(@PathVariable int id, RedirectAttributes ra) {
         try {
             pdao.delete(id);
-            redirectAttributes.addFlashAttribute("mensagem", "Plataforma removida com sucesso!");
+            ra.addFlashAttribute("mensagem", "Plataforma removida com sucesso!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao excluir plataforma: " + e.getMessage());
+            ra.addFlashAttribute("erro", "Erro ao excluir plataforma: " + e.getMessage());
         }
         return "redirect:/plataforma";
+    }
+
+    @GetMapping("/plataforma/{id}/jogadores")
+    @ResponseBody
+    public List<JogadorDTO> listarJogadoresPorPlataforma(@PathVariable Long id) {
+        List<Jogador> jogadores = jdao.findByPlataforma(Math.toIntExact(id));
+        return jogadores.stream()
+                .map(j -> new JogadorDTO(j.getId(), j.getNome(), j.getEmail()))
+                .toList();
     }
 
 

@@ -2,6 +2,7 @@ package br.edu.ifrs.persistence;
 
 import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
+import br.edu.ifrs.model.Plataforma;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
@@ -55,5 +56,12 @@ public class JogadorDao implements dao<Jogador>{
 
         List<Jogador> lista = sql.getResultList();
         return lista;
+    }
+
+    public List<Jogador> findByPlataforma(int plataformaId){
+        return manager.createQuery(
+                        "SELECT j FROM Jogador j WHERE j.plataforma.id = :plataformaId", Jogador.class)
+                .setParameter("plataformaId", plataformaId)
+                .getResultList();
     }
 }

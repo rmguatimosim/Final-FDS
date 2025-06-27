@@ -67,7 +67,10 @@
         <td th:text="${plataforma.nome}">Nome</td>
         <td>
             <button th:onclick="'location.href=\'/plataforma/' + ${plataforma.id} + '/jogos\''">Jogos</button>
-            <button th:onclick="'location.href=\'/plataforma/' + ${plataforma.id} + '/jogadores\''">Jogadores</button>
+            <button type="button" th:onclick="'abrirModalJogadores(' + ${plataforma.id} + ')'">
+                Jogadores
+            </button>
+
             <button onclick="editarPlataforma(this)"
                     th:attr="data-id=${plataforma.id},
                                  data-nome=${plataforma.nome},
@@ -104,8 +107,9 @@
             <select name="tipo" id="formTipo" required>
                 <option value="">Selecione...</option>
                 <option value="CONSOLE" th:selected="${form?.tipo == 'CONSOLE'}">Console</option>
-                <option value="PC" th:selected="${form?.tipo == 'PC'}">PC</option>
+                <option value="REPOSITORIO" th:selected="${form?.tipo == 'REPOSITORIO'}">Repositório</option>
                 <option value="MOBILE" th:selected="${form?.tipo == 'MOBILE'}">Mobile</option>
+                <option value="PORTATIL" th:selected="${form?.tipo == 'PORTATIL'}">Portátil</option>
             </select><br><br>
             <label>Proprietária:</label><br>
             <input type="text" name="proprietaria" id="formProprietaria" required th:value="${form?.proprietaria}"><br><br>
@@ -116,6 +120,16 @@
         </form>
     </div>
 </div>
+<div id="jogadoresModal" style="display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3>Jogadores da Plataforma</h3>
+        <ul id="listaJogadores">
+
+        </ul>
+        <button onclick="fecharModalJogadores()">Fechar</button>
+    </div>
+</div>
+
 
 
 <script>
@@ -136,12 +150,6 @@
         document.getElementById('plataformaModal').style.display = 'block';
     }
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('plataformaModal');
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
 </script>
 
 <div th:if="${abrirModal}">
@@ -151,6 +159,52 @@
         };
     </script>
 </div>
+<script>
+    function abrirModalJogadores(plataformaId) {
+        const lista = document.getElementById("listaJogadores");
+        lista.innerHTML = "<li>Carregando jogadores...</li>";
+
+        fetch(`/plataforma/${plataformaId}/jogadores`)
+            .then(response => {
+                if (!response.ok) throw new Error();
+                return response.json();
+            })
+            .then(jogadores => {
+                lista.innerHTML = "";
+                if (jogadores.length === 0) {
+                    lista.innerHTML = "<li>Nenhum jogador associado.</li>";
+                } else {
+                    jogadores.forEach(j => {
+                        const li = document.createElement("li");
+                        li.textContent = j.nome + " (" + j.email + ")";
+                        lista.appendChild(li);
+                    });
+                }
+            })
+            .catch(() => {
+                lista.innerHTML = "<li>Erro ao buscar jogadores.</li>";
+            });
+
+        document.getElementById("jogadoresModal").style.display = "block";
+    }
+
+    function fecharModalJogadores() {
+        document.getElementById("jogadoresModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        const plataformaModal = document.getElementById("plataformaModal");
+        const jogadoresModal = document.getElementById("jogadoresModal");
+
+        if (event.target === plataformaModal) {
+            plataformaModal.style.display = "none";
+        }
+
+        if (event.target === jogadoresModal) {
+            jogadoresModal.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>
