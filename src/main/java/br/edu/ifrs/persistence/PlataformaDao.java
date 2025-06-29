@@ -50,7 +50,7 @@ public class PlataformaDao implements dao<Plataforma>{
 
     @Override
     public List<Plataforma> findAll(int offset, int limit) {
-        Query sql = manager.createQuery("SELECT p FROM Plataforma p", Plataforma.class);
+        Query sql = manager.createQuery("SELECT p FROM Plataforma p ORDER BY p.nome", Plataforma.class);
         sql.setFirstResult(offset).setMaxResults(limit);
 
         List<Plataforma> lista = sql.getResultList();

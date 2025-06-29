@@ -76,11 +76,11 @@ public class JogadorController {
     }
 
     @PostMapping("/jogador/atribuir-plataforma")
-    public String atribuirPlataforma(@RequestParam Long jogadorId,
-                                     @RequestParam Long plataformaId,
+    public String atribuirPlataforma(@RequestParam int jogadorId,
+                                     @RequestParam int plataformaId,
                                      RedirectAttributes ra) {
-        Jogador j = jdao.find(Math.toIntExact(jogadorId));
-        j.setPlataforma(pdao.find(Math.toIntExact(plataformaId)));
+        Jogador j = jdao.find(jogadorId);
+        j.setPlataforma(pdao.find(plataformaId));
         jdao.update(j);
         ra.addFlashAttribute("mensagem", "Plataforma atribuída com sucesso!");
         return "redirect:/jogador";
@@ -88,17 +88,21 @@ public class JogadorController {
 
     @GetMapping("/jogador/{id}/jogos")
     @ResponseBody
-    public List<JogoDTO> listarJogosDoJogador(@PathVariable Long id) {
-        List<Jogo> jogos = jdao.find(Math.toIntExact(id)).getJogos();
+    public List<JogoDTO> listarJogosDoJogador(@PathVariable int id) {
+        List<Jogo> jogos = jdao.find(id).getJogos();
         return jogos.stream()
                 .map(j -> new JogoDTO(j.getId(), j.getTitulo(), j.getAnoLancamento()))
                 .toList();
     }
 
     @PostMapping("/jogador/incluir-jogo")
-    public String incluirJogo(@RequestParam Long jogadorId, @RequestParam Long jogoId, RedirectAttributes re) {
-        Jogador j = jdao.find(Math.toIntExact(jogadorId));
-        Jogo jogo = jodao.find(Math.toIntExact(jogoId));
+    public String incluirJogo(@RequestParam int jogadorId, @RequestParam int jogoId, RedirectAttributes re) {
+        Jogador j = jdao.find(jogadorId);
+        Jogo jogo = jodao.find(jogoId);
+//        if(!jogo.getPlataformas().contains(j.getPlataforma())){
+//            String msg = "Jogo não disponível para a plataforma \"" + j.getPlataforma().getNome() + "\".";
+//            re.addFlashAttribute("erro", msg);
+//        }
         List<Jogo> lista = j.getJogos();
         if(lista.contains(jogo)){
             re.addFlashAttribute("erro", "Jogo já consta na lista!");
@@ -112,9 +116,9 @@ public class JogadorController {
     }
     @DeleteMapping("/jogador/{jogadorId}/remover-jogo/{jogoId}")
     @ResponseBody
-    public ResponseEntity<?> removerJogo(@PathVariable Long jogadorId, @PathVariable Long jogoId) {
-        Jogador j = jdao.find(Math.toIntExact(jogadorId));
-        j.getJogos().remove(jodao.find(Math.toIntExact(jogoId)));
+    public ResponseEntity<?> removerJogo(@PathVariable int jogadorId, @PathVariable int jogoId) {
+        Jogador j = jdao.find(jogadorId);
+        j.getJogos().remove(jodao.find(jogoId));
         jdao.update(j);
         return ResponseEntity.ok().build();
     }

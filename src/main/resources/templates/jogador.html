@@ -88,15 +88,13 @@
         <td th:text="${jogador.nome}">Nome</td>
         <td>
             <span th:if="${jogador.plataforma != null}" th:text="${jogador.plataforma.nome}">Plataforma</span>
-
-            <button th:onclick="'abrirModalPlataforma(' + ${jogador.id} + ')'"
+            <button style="float: right;"
+                    th:onclick="'abrirModalPlataforma(' + ${jogador.id} + ')'"
                     th:text="${jogador.plataforma == null} ? 'Incluir Plataforma' : 'Alterar Plataforma'"
                     th:class="${jogador.plataforma == null} ? 'botao-incluir' : 'botao-alterar'">
                 Botão Plataforma
             </button>
         </td>
-
-
         <td>
             <button type="button" th:onclick="'abrirModalJogos(' + ${jogador.id} + ')'">Jogos</button>
             <button onclick="editarJogador(this)" th:attr="data-id=${jogador.id},
@@ -123,6 +121,7 @@
 
 </div>
 
+<!--modal para cadastrar novo jogador -->
 <div id="jogadorModal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <div class="modal-content">
         <div th:if="${erroModal}" style="color: red; margin-bottom: 10px;">
@@ -144,6 +143,7 @@
         </form>
     </div>
 </div>
+<!-- modal para selecionar plataforma -->
 <div id="modalPlataforma" style="display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <div class="modal-content">
         <h3>Selecionar Plataforma</h3>
@@ -158,11 +158,11 @@
     </div>
 </div>
 
+<!-- modal para mostrar jogos do jogador -->
 <div id="jogosModal" style="display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
         <h3>Jogos do Jogador</h3>
         <ul id="listaJogos"></ul>
-
         <form id="formIncluirJogo" method="post" th:action="@{/jogador/incluir-jogo}">
             <input type="hidden" name="jogadorId" id="jogadorIdParaIncluir">
             <select name="jogoId" id="jogoSelect">
@@ -170,7 +170,6 @@
             </select>
             <button type="submit">Incluir</button>
         </form>
-
         <button onclick="fecharModalJogos()">Fechar</button>
     </div>
 </div>
@@ -264,7 +263,6 @@
         })
         .then(response => {
             if (!response.ok) throw new Error()
-            // Recarrega o modal para refletir a mudança
             abrirModalJogos(jogadorId)
         })
         .catch(() => alert("Erro ao remover jogo."))

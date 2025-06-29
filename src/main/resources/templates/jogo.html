@@ -64,9 +64,7 @@
         <td th:text="${jogo.id}">ID</td>
         <td th:text="${jogo.titulo}">Título</td>
         <td>
-            <button th:onclick="'location.href=\'/jogo/' + ${jogo.id} + '/plataformas\''">
-                Plataforma
-            </button>
+            <button type="button" th:onclick="'abrirModalPlataformas(' + ${jogo.id} + ')'">Plataformas</button>
             <button onclick="editarJogo(this)"
                     th:attr="data-id=${jogo.id},
                                  data-titulo=${jogo.titulo},
@@ -109,7 +107,21 @@
     </div>
 </div>
 
-<!-- ✅ Scripts -->
+<div id="plataformasModal" style="display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3>Plataformas disponíveis</h3>
+        <ul id="listaPlataformas"></ul>
+        <form id="formIncluirPlataforma" method="post" th:action="@{/jogo/incluir-plataforma}">
+            <input type="hidden" name="jogoId" id="plataformaIdParaIncluir">
+            <select name="plataformaId" id="plataformaSelect">
+                <option th:each="plataforma : ${plataformas}" th:value="${plataforma.id}" th:text="${plataforma.nome}">Plataforma</option>
+            </select>
+            <button type="submit">Incluir</button>
+        </form>
+        <button onclick="fecharModalPlataformas()">Fechar</button>
+    </div>
+</div>
+<!--Scripts -->
 <script>
     function abrirModalCadastroJogo() {
         document.getElementById('formJogo').reset();
@@ -143,6 +155,51 @@
         };
     </script>
 </div>
+
+<script>
+    function abrirModalPlataformas(jogoId) {
+        document.getElementById("plataformaIdParaIncluir").value = jogoId;
+        const lista = document.getElementById("listaPlataformas");
+        lista.innerHTML = "<li>Carregando...</li>";
+
+        fetch(`/jogo/${jogoId}/plataformas`)
+            .then(res => res.json())
+            .then(plataformas => {
+                lista.innerHTML = "";
+                if (plataformas.length === 0) {
+                    lista.innerHTML = "<li>Nenhuma plataforma disponível.</li>";
+                } else {
+                    plataformas.forEach(plataforma => {
+                        const li = document.createElement("li")
+                        li.innerHTML = `${plataforma.nome}
+                        <button onclick="removerPlataforma(${plataforma.id}, ${jogoId})">Remover</button>`;
+                        lista.appendChild(li);
+                    });
+                                    }
+            })
+            .catch(() => {
+                lista.innerHTML = "<li>Erro ao carregar plataformas.</li>";
+            });
+
+        document.getElementById("plataformasModal").style.display = "block";
+    }
+
+    function fecharModalPlataformas() {
+        document.getElementById("plataformasModal").style.display = "none";
+    }
+    function removerPlataforma(plataformaId, jogoId) {
+        if (!confirm("Deseja realmente remover este jogo desta plataforma?")) return;
+
+        fetch(`/jogo/${jogoId}/remover-plataforma/${plataformaId}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (!response.ok) throw new Error()
+            abrirModalPlataformas(jogoId)
+        })
+        .catch(() => alert("Erro ao remover a plataforma."))
+    }
+</script>
 
 </body>
 </html>

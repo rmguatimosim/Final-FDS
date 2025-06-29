@@ -51,7 +51,7 @@ public class JogadorDao implements dao<Jogador>{
 
     @Override
     public List<Jogador> findAll(int offset, int limit) {
-        Query sql = manager.createQuery("SELECT j FROM Jogador j", Jogador.class);
+        Query sql = manager.createQuery("SELECT j FROM Jogador j ORDER BY j.nome", Jogador.class);
         sql.setFirstResult(offset).setMaxResults(limit);
 
         List<Jogador> lista = sql.getResultList();
