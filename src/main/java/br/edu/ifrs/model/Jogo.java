@@ -3,6 +3,7 @@ package br.edu.ifrs.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="jogo")
@@ -80,6 +81,18 @@ public class Jogo {
 
     public void setPlataformas(List<Plataforma> plataformas) {
         this.plataformas = plataformas;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Jogo jogo = (Jogo) o;
+        return getId() == jogo.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 }
 

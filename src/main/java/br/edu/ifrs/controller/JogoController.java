@@ -23,11 +23,15 @@ public class JogoController {
 
     private final JogoDao jdao = new JogoDao(ConnectionBD.connection("prodUnit"));
     private final PlataformaDao pdao = new PlataformaDao(ConnectionBD.connection("prodUnit"));
+
     @GetMapping("/jogo")
-    public String listarJogos(Model model){
-        List<Jogo> jogos = jdao.findAll(0,10);
+    public String listarJogos(@RequestParam(defaultValue = "0") int offset,
+                              @RequestParam(defaultValue = "10") int limit,
+                              Model model) {
+        List<Jogo> jogos = jdao.findAll(offset, limit);
         model.addAttribute("jogos", jogos);
-        model.addAttribute("plataformas", pdao.findAll(0,10));
+        model.addAttribute("offset", offset);
+        model.addAttribute("limit", limit);
         return "jogo";
     }
 
@@ -58,47 +62,57 @@ public class JogoController {
             model.addAttribute("erroModal", "Erro ao salvar jogo: " + e.getMessage());
             model.addAttribute("abrirModal", true);
             model.addAttribute("form", form);
-            return listarJogos(model);
+            return listarJogos(0,10,model);
         }
     }
     @PostMapping("/jogo/deletar/{id}")
     public String deletarJogo(@PathVariable int id, RedirectAttributes redirectAttributes){
         try{
             jdao.delete(id);
+            redirectAttributes.addFlashAttribute("mensagem", "Jogador excluído com sucesso!");
         } catch(Exception e){
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir jogador: " + e.getMessage());
         }
         return "redirect:/jogo";
     }
+
     @GetMapping("/jogo/{id}/plataformas")
     @ResponseBody
-    public List<PlataformaDTO> listarJogosDoJogador(@PathVariable int id) {
+    public List<PlataformaDTO> listarPlataformas(@PathVariable int id) {
         List<Plataforma> plataformas = jdao.find(id).getPlataformas();
         return plataformas.stream()
                 .map(p -> new PlataformaDTO(p.getId(), p.getNome(), p.getEmail()))
                 .toList();
     }
+
     @PostMapping("/jogo/incluir-plataforma")
     public String incluirPlataforma(@RequestParam int jogoId, @RequestParam int plataformaId, RedirectAttributes re) {
         Jogo j = jdao.find(jogoId);
-        Plataforma plataforma = pdao.find(plataformaId);
-        List<Plataforma> lista = j.getPlataformas();
-        if(lista.contains(plataforma)){
+        Plataforma p = pdao.find(plataformaId);
+        if(p.getJogosDisponiveis().contains(j)){
             re.addFlashAttribute("erro", "Plataforma já consta na lista!");
         }
         else{
-            lista.add(plataforma);
-            re.addFlashAttribute("mensagem", "Plataforma incluído com sucesso!");
-
+            p.getJogosDisponiveis().add(j);
+            pdao.update(p);
+            re.addFlashAttribute("mensagem", "Plataforma incluída com sucesso!");
         }
         return "redirect:/jogo";
     }
     @DeleteMapping("/jogo/{jogoId}/remover-plataforma/{plataformaId}")
     @ResponseBody
-    public ResponseEntity<?> removerJogo(@PathVariable int jogoId, @PathVariable int plataformaId) {
+    public ResponseEntity<?> removerPlataforma(@PathVariable int jogoId, @PathVariable int plataformaId) {
+        Plataforma p = pdao.find(plataformaId);
         Jogo j = jdao.find(jogoId);
-        j.getPlataformas().remove(pdao.find(plataformaId));
-        jdao.update(j);
+        if (p == null || j == null) {
+            return ResponseEntity.notFound().build();
+        }
+        p.getJogosDisponiveis().remove(j);
+        j.getPlataformas().remove(p);
+        pdao.update(p);
         return ResponseEntity.ok().build();
     }
+
+
+
 }

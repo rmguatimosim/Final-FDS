@@ -16,8 +16,8 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("mensagem", "Bem-vindo ao projeto Final-FDS com Thymeleaf!");
-        return "index";
+
+        return "redirect:/jogador";
     }
 
 

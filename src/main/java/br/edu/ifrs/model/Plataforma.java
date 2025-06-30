@@ -3,6 +3,7 @@ package br.edu.ifrs.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="plataforma")
@@ -26,7 +27,8 @@ public class Plataforma {
     @ManyToMany
     @JoinTable(name="plataforma_jogo",
             joinColumns = @JoinColumn(name="idPlataforma"),
-            inverseJoinColumns = @JoinColumn(name="idJogo"))
+            inverseJoinColumns = @JoinColumn(name="idJogo"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"idPlataforma", "idJogo"}))
     private List<Jogo> jogosDisponiveis;
 
 
@@ -100,6 +102,18 @@ public class Plataforma {
 
     public void setJogosDisponiveis(List<Jogo> jogosDisponiveis) {
         this.jogosDisponiveis = jogosDisponiveis;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Plataforma that = (Plataforma) o;
+        return getId() == that.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 }
 

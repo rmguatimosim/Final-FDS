@@ -1,12 +1,8 @@
 package br.edu.ifrs.persistence;
 
-import br.edu.ifrs.connectionFactory.ConnectionBD;
 import br.edu.ifrs.model.Jogador;
-import br.edu.ifrs.model.Plataforma;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
-
 import java.util.List;
 
 public class JogadorDao implements dao<Jogador>{
@@ -19,25 +15,26 @@ public class JogadorDao implements dao<Jogador>{
 
     @Override
     public void insert(Jogador obj) {
-        this.manager.getTransaction().begin();
+        manager.getTransaction().begin();
         manager.persist(obj);
-        this.manager.getTransaction().commit();
+        manager.getTransaction().commit();
     }
 
     @Override
     public void update(Jogador obj) {
-        this.manager.getTransaction().begin();
+        manager.getTransaction().begin();
         manager.merge(obj);
-        this.manager.getTransaction().commit();
+        manager.flush();
+        manager.getTransaction().commit();
     }
 
     @Override
     public void delete(int id) {
         Jogador j = manager.find(Jogador.class, id);
         if(j != null){
-            this.manager.getTransaction().begin();
+            manager.getTransaction().begin();
             manager.remove(j);
-            this.manager.getTransaction().commit();
+            manager.getTransaction().commit();
         }
         else{
             throw new IllegalArgumentException("Não foi encontrado jogador com ID " + id);
@@ -51,7 +48,7 @@ public class JogadorDao implements dao<Jogador>{
 
     @Override
     public List<Jogador> findAll(int offset, int limit) {
-        Query sql = manager.createQuery("SELECT j FROM Jogador j ORDER BY j.nome", Jogador.class);
+        Query sql = manager.createQuery("SELECT j FROM Jogador j ORDER BY j.id", Jogador.class);
         sql.setFirstResult(offset).setMaxResults(limit);
 
         List<Jogador> lista = sql.getResultList();

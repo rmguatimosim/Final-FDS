@@ -4,6 +4,7 @@ package br.edu.ifrs.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,8 @@ public class Jogador {
     @ManyToMany
     @JoinTable(name="jogador_jogo",
         joinColumns = @JoinColumn(name="idJogador"),
-        inverseJoinColumns = @JoinColumn(name="idJogo"))
+        inverseJoinColumns = @JoinColumn(name="idJogo"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"idJogador", "idJogo"}))
     private List<Jogo> jogos;
 
 
@@ -174,6 +176,18 @@ public class Jogador {
         this.jogos = jogos;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Jogador jogador = (Jogador) o;
+        return getId() == jogador.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
 }
 
 

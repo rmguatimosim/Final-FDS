@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Plataformas</title>
+    <title>&#128187;Plataformas</title>
     <style>
         body {
             margin-top: 60px;
@@ -66,7 +66,7 @@
         <td th:text="${plataforma.id}">ID</td>
         <td th:text="${plataforma.nome}">Nome</td>
         <td>
-            <button th:onclick="'location.href=\'/plataforma/' + ${plataforma.id} + '/jogos\''">Jogos</button>
+            <button type="button" th:onclick="'abrirModalJogos(' + ${plataforma.id} + ')'">Jogos</button>
             <button type="button" th:onclick="'abrirModalJogadores(' + ${plataforma.id} + ')'">
                 Jogadores
             </button>
@@ -86,6 +86,17 @@
     </tr>
     </tbody>
 </table>
+<div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+    <a th:href="@{/plataforma(offset=${offset - limit}, limit=${limit})}"
+       th:if="${offset > 0}">
+        <button>⬅️ Anterior</button>
+    </a>
+    <a th:href="@{/plataforma(offset=${offset + limit}, limit=${limit})}"
+       th:if="${plataformas.size() == limit}">
+        <button>Próxima ➡️</button>
+    </a>
+</div>
+
 
 
 <div style="text-align: center;">
@@ -127,6 +138,21 @@
 
         </ul>
         <button onclick="fecharModalJogadores()">Fechar</button>
+    </div>
+</div>
+
+<div id="jogosModal" style="display: none; position: fixed; z-index: 20; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3>Jogos disponíveis</h3>
+        <ul id="listaJogos"></ul>
+        <form id="formIncluirJogo" method="post" th:action="@{/plataforma/incluir-jogo}">
+            <input type="hidden" name="plataformaId" id="plataformaIdParaIncluir">
+            <select name="jogoId" id="jogoSelect">
+                <option th:each="jogo : ${jogos}" th:value="${jogo.id}" th:text="${jogo.titulo}">Jogo</option>
+            </select>
+            <button type="submit">Incluir</button>
+        </form>
+        <button onclick="fecharModalJogos()">Fechar</button>
     </div>
 </div>
 
@@ -203,6 +229,53 @@
         if (event.target === jogadoresModal) {
             jogadoresModal.style.display = "none";
         }
+    }
+</script>
+<script>
+    function abrirModalJogos(plataformaId) {
+        document.getElementById("plataformaIdParaIncluir").value = plataformaId;
+        const lista = document.getElementById("listaJogos");
+        lista.innerHTML = "<li>Carregando...</li>";
+
+        fetch(`/plataforma/${plataformaId}/jogos`)
+            .then(res => res.json())
+            .then(jogos => {
+                lista.innerHTML = "";
+                if (jogos.length === 0) {
+                    lista.innerHTML = "<li>Nenhum jogo disponível.</li>";
+                } else {
+                    jogos.forEach(jogo => {
+                        const li = document.createElement("li")
+                        li.innerHTML = `${jogo.nome}(${jogo.anoLancamento})
+                        <button onclick="removerJogo(${jogo.id}, ${plataformaId})">Remover</button>`;
+                        lista.appendChild(li);
+                    });
+                                    }
+            })
+            .catch(() => {
+                lista.innerHTML = "<li>Erro ao carregar jogos.</li>";
+            });
+
+        document.getElementById("jogosModal").style.display = "block";
+    }
+
+    function fecharModalJogos() {
+        document.getElementById("jogosModal").style.display = "none";
+    }
+    function removerJogo(jogoId, plataformaId) {
+        if (!confirm("Deseja realmente remover este jogo desta plataforma?")) return;
+
+        fetch(`/plataforma/${plataformaId}/remover-jogo/${jogoId}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (!response.ok) throw new Error()
+            return response.text()
+        })
+        .then(() => {
+                        abrirModalJogos(plataformaId)
+        })
+        .catch(() => alert("Erro ao remover o jogo."))
     }
 </script>
 

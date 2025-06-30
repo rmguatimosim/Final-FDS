@@ -5,6 +5,7 @@ import br.edu.ifrs.form.JogadorForm;
 import br.edu.ifrs.form.JogoDTO;
 import br.edu.ifrs.model.Jogador;
 import br.edu.ifrs.model.Jogo;
+import br.edu.ifrs.model.Plataforma;
 import br.edu.ifrs.persistence.JogadorDao;
 import br.edu.ifrs.persistence.JogoDao;
 import br.edu.ifrs.persistence.PlataformaDao;
@@ -15,9 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
-import java.math.MathContext;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -26,13 +25,32 @@ public class JogadorController {
     private final PlataformaDao pdao = new PlataformaDao(ConnectionBD.connection("prodUnit"));
     private final JogoDao jodao = new JogoDao(ConnectionBD.connection("prodUnit"));
 
+
+
     @GetMapping("/jogador")
-    public String listarJogadores(Model model){
-        List<Jogador> jogadores = jdao.findAll(0,10);
+    public String listarJogadores(@RequestParam(defaultValue = "0") int offset,
+                                  @RequestParam(defaultValue = "10") int limit,
+                                  Model model) {
+        List<Jogador> jogadores = jdao.findAll(offset, limit);
         model.addAttribute("jogadores", jogadores);
-        model.addAttribute("plataformas", pdao.findAll(0,10));
-        model.addAttribute("jogos", jodao.findAll(0,10));
+        model.addAttribute("offset", offset);
+        model.addAttribute("limit", limit);
+        model.addAttribute("plataformas", pdao.findAll(0, 10));
+        model.addAttribute("jogos", jodao.findAll(0, 10));
         return "jogador";
+    }
+
+
+    @GetMapping("/jogador/{jogadorId}/jogos-disponiveis")
+    @ResponseBody
+    public List<JogoDTO> listarJogosDisponiveisParaJogador(@PathVariable int jogadorId) {
+        Jogador jogador = jdao.find(jogadorId);
+        Plataforma plataforma = jogador.getPlataforma();
+        if (plataforma == null) return List.of();
+        return plataforma.getJogosDisponiveis().stream()
+                .filter(jogo -> !jogador.getJogos().contains(jogo))
+                .map(j -> new JogoDTO(j.getId(), j.getTitulo(), j.getAnoLancamento()))
+                .toList();
     }
 
     @PostMapping("/jogador/salvar")
@@ -60,7 +78,7 @@ public class JogadorController {
             model.addAttribute("form", form);
             model.addAttribute("erroModal", "Erro ao salvar jogador: " + e.getMessage());
             model.addAttribute("abrirModal", true);
-            return listarJogadores(model);
+            return listarJogadores(0,10,model);
         }
     }
 
@@ -98,19 +116,13 @@ public class JogadorController {
     @PostMapping("/jogador/incluir-jogo")
     public String incluirJogo(@RequestParam int jogadorId, @RequestParam int jogoId, RedirectAttributes re) {
         Jogador j = jdao.find(jogadorId);
-        Jogo jogo = jodao.find(jogoId);
-//        if(!jogo.getPlataformas().contains(j.getPlataforma())){
-//            String msg = "Jogo não disponível para a plataforma \"" + j.getPlataforma().getNome() + "\".";
-//            re.addFlashAttribute("erro", msg);
-//        }
-        List<Jogo> lista = j.getJogos();
-        if(lista.contains(jogo)){
+        if(j.getJogos().contains(jodao.find(jogoId))){
             re.addFlashAttribute("erro", "Jogo já consta na lista!");
         }
         else{
-            lista.add(jogo);
+            j.getJogos().add(jodao.find(jogoId));
+            jdao.update(j);
             re.addFlashAttribute("mensagem", "Jogo incluído com sucesso!");
-
         }
         return "redirect:/jogador";
     }
@@ -118,10 +130,15 @@ public class JogadorController {
     @ResponseBody
     public ResponseEntity<?> removerJogo(@PathVariable int jogadorId, @PathVariable int jogoId) {
         Jogador j = jdao.find(jogadorId);
+        Jogo jogo = jodao.find(jogoId);
+        System.out.println(j.getJogos().contains(jodao.find(jogoId)));
         j.getJogos().remove(jodao.find(jogoId));
         jdao.update(j);
         return ResponseEntity.ok().build();
     }
+
+
+
 
 
 }

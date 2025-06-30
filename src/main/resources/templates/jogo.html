@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Jogos</title>
+    <title>&#127918;Jogos</title>
     <style>
         body {
             margin-top: 60px;
@@ -80,6 +80,17 @@
     </tr>
     </tbody>
 </table>
+<div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+    <a th:href="@{/jogo(offset=${offset - limit}, limit=${limit})}"
+       th:if="${offset > 0}">
+        <button>⬅️ Anterior</button>
+    </a>
+    <a th:href="@{/jogo(offset=${offset + limit}, limit=${limit})}"
+       th:if="${jogos.size() == limit}">
+        <button>Próxima ➡️</button>
+    </a>
+</div>
+
 
 <div style="text-align: center;">
     <button onclick="abrirModalCadastroJogo()">Cadastrar Novo Jogo</button>
@@ -112,7 +123,7 @@
         <h3>Plataformas disponíveis</h3>
         <ul id="listaPlataformas"></ul>
         <form id="formIncluirPlataforma" method="post" th:action="@{/jogo/incluir-plataforma}">
-            <input type="hidden" name="jogoId" id="plataformaIdParaIncluir">
+            <input type="hidden" name="jogoId" id="jogoIdParaIncluir">
             <select name="plataformaId" id="plataformaSelect">
                 <option th:each="plataforma : ${plataformas}" th:value="${plataforma.id}" th:text="${plataforma.nome}">Plataforma</option>
             </select>
@@ -158,7 +169,7 @@
 
 <script>
     function abrirModalPlataformas(jogoId) {
-        document.getElementById("plataformaIdParaIncluir").value = jogoId;
+        document.getElementById("jogoIdParaIncluir").value = jogoId;
         const lista = document.getElementById("listaPlataformas");
         lista.innerHTML = "<li>Carregando...</li>";
 
@@ -189,12 +200,14 @@
     }
     function removerPlataforma(plataformaId, jogoId) {
         if (!confirm("Deseja realmente remover este jogo desta plataforma?")) return;
-
         fetch(`/jogo/${jogoId}/remover-plataforma/${plataformaId}`, {
             method: "DELETE"
         })
         .then(response => {
             if (!response.ok) throw new Error()
+            return response.text()
+        })
+        .then(() => {
             abrirModalPlataformas(jogoId)
         })
         .catch(() => alert("Erro ao remover a plataforma."))

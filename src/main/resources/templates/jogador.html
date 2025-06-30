@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Jogadores</title>
+    <title>&#128101;Jogadores</title>
     <style>
         body {
             margin-top: 60px;
@@ -115,6 +115,18 @@
     </tr>
     </tbody>
 </table>
+<div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+    <a th:href="@{/jogador(offset=${offset - limit}, limit=${limit})}"
+       th:if="${offset > 0}">
+        <button>⬅️ Anterior</button>
+    </a>
+    <a th:href="@{/jogador(offset=${offset + limit}, limit=${limit})}"
+       th:if="${jogadores.size() == limit}">
+        <button>Próxima ➡️</button>
+    </a>
+</div>
+
+
 
 <div style="text-align: center;">
     <button onclick="abrirModalCadastro()">Cadastrar Novo Jogador</button>
@@ -163,13 +175,15 @@
     <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
         <h3>Jogos do Jogador</h3>
         <ul id="listaJogos"></ul>
-        <form id="formIncluirJogo" method="post" th:action="@{/jogador/incluir-jogo}">
+
+        <form id="formIncluirJogo" method="post" action="/jogador/incluir-jogo">
             <input type="hidden" name="jogadorId" id="jogadorIdParaIncluir">
             <select name="jogoId" id="jogoSelect">
-                <option th:each="jogo : ${jogos}" th:value="${jogo.id}" th:text="${jogo.titulo}">Jogo</option>
+                <option disabled selected>Carregando jogos disponíveis...</option>
             </select>
             <button type="submit">Incluir</button>
         </form>
+
         <button onclick="fecharModalJogos()">Fechar</button>
     </div>
 </div>
@@ -228,8 +242,10 @@
     function abrirModalJogos(jogadorId) {
         document.getElementById("jogadorIdParaIncluir").value = jogadorId;
         const lista = document.getElementById("listaJogos");
-        lista.innerHTML = "<li>Carregando...</li>";
+        const select = document.getElementById("jogoSelect");
 
+        // Carrega jogos já associados ao jogador
+        lista.innerHTML = "<li>Carregando jogos associados...</li>";
         fetch(`/jogador/${jogadorId}/jogos`)
             .then(res => res.json())
             .then(jogos => {
@@ -238,15 +254,40 @@
                     lista.innerHTML = "<li>Nenhum jogo associado.</li>";
                 } else {
                     jogos.forEach(jogo => {
-                        const li = document.createElement("li")
+                        const li = document.createElement("li");
                         li.innerHTML = `${jogo.nome} (${jogo.anoLancamento})
-                        <button onclick="removerJogo(${jogo.id}, ${jogadorId})">Remover</button>`;
+                            <button onclick="removerJogo(${jogo.id}, ${jogadorId})">Remover</button>`;
                         lista.appendChild(li);
                     });
-                                    }
+                }
             })
             .catch(() => {
-                lista.innerHTML = "<li>Erro ao carregar jogos.</li>";
+                lista.innerHTML = "<li>Erro ao carregar jogos associados.</li>";
+            });
+
+        // Script para carregar os jogos baseado na plataforma do jogador
+        select.innerHTML = "<option disabled selected>Carregando jogos disponíveis...</option>";
+        fetch(`/jogador/${jogadorId}/jogos-disponiveis`)
+            .then(res => res.json())
+            .then(jogosDisponiveis => {
+                select.innerHTML = "";
+                if (jogosDisponiveis.length === 0) {
+                    const option = document.createElement("option");
+                    option.disabled = true;
+                    option.selected = true;
+                    option.textContent = "Nenhum jogo disponível para essa plataforma.";
+                    select.appendChild(option);
+                } else {
+                    jogosDisponiveis.forEach(jogo => {
+                        const option = document.createElement("option");
+                        option.value = jogo.id;
+                        option.textContent = `${jogo.nome} (${jogo.anoLancamento})`;
+                        select.appendChild(option);
+                    });
+                }
+            })
+            .catch(() => {
+                select.innerHTML = "<option disabled>Erro ao carregar jogos disponíveis.</option>";
             });
 
         document.getElementById("jogosModal").style.display = "block";
@@ -255,6 +296,7 @@
     function fecharModalJogos() {
         document.getElementById("jogosModal").style.display = "none";
     }
+
     function removerJogo(jogoId, jogadorId) {
         if (!confirm("Deseja realmente remover este jogo do jogador?")) return;
 
@@ -262,10 +304,14 @@
             method: "DELETE"
         })
         .then(response => {
-            if (!response.ok) throw new Error()
-            abrirModalJogos(jogadorId)
+            console.log(response.status);
+            if (!response.ok) throw new Error();
+            return response.text();
         })
-        .catch(() => alert("Erro ao remover jogo."))
+        .then(() => {
+            abrirModalJogos(jogadorId); // atualiza o modal após remoção
+        })
+        .catch(() => alert("Erro ao remover jogo."));
     }
 </script>
 
