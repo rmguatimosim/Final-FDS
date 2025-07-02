@@ -9,6 +9,7 @@ import br.edu.ifrs.model.Plataforma;
 import br.edu.ifrs.persistence.JogadorDao;
 import br.edu.ifrs.persistence.JogoDao;
 import br.edu.ifrs.persistence.PlataformaDao;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,18 +29,12 @@ public class JogadorController {
 
 
     @GetMapping("/jogador")
-    public String listarJogadores(@RequestParam(defaultValue = "0") int offset,
-                                  @RequestParam(defaultValue = "10") int limit,
-                                  Model model) {
-        List<Jogador> jogadores = jdao.findAll(offset, limit);
-        model.addAttribute("jogadores", jogadores);
-        model.addAttribute("offset", offset);
-        model.addAttribute("limit", limit);
-        model.addAttribute("plataformas", pdao.findAll(0, 10));
-        model.addAttribute("jogos", jodao.findAll(0, 10));
+    public String listarJogadores(Model model) {
+        model.addAttribute("jogadores", jdao.findAll(0,100));
+        model.addAttribute("plataformas", pdao.findAll(0, 100));
+        model.addAttribute("jogos", jodao.findAll(0, 100));
         return "jogador";
     }
-
 
     @GetMapping("/jogador/{jogadorId}/jogos-disponiveis")
     @ResponseBody
@@ -47,10 +42,8 @@ public class JogadorController {
         Jogador jogador = jdao.find(jogadorId);
         Plataforma plataforma = jogador.getPlataforma();
         if (plataforma == null) return List.of();
-        return plataforma.getJogosDisponiveis().stream()
-                .filter(jogo -> !jogador.getJogos().contains(jogo))
-                .map(j -> new JogoDTO(j.getId(), j.getTitulo(), j.getAnoLancamento()))
-                .toList();
+        List<Jogo> lista = plataforma.getJogosDisponiveis().stream().filter(jogo -> !jogador.getJogos().contains(jogo)).toList();
+        return lista.stream().map(j -> new JogoDTO(j.getId(), j.getTitulo(), j.getAnoLancamento())).toList();
     }
 
     @PostMapping("/jogador/salvar")
@@ -78,7 +71,7 @@ public class JogadorController {
             model.addAttribute("form", form);
             model.addAttribute("erroModal", "Erro ao salvar jogador: " + e.getMessage());
             model.addAttribute("abrirModal", true);
-            return listarJogadores(0,10,model);
+            return listarJogadores(model);
         }
     }
 
@@ -116,7 +109,10 @@ public class JogadorController {
     @PostMapping("/jogador/incluir-jogo")
     public String incluirJogo(@RequestParam int jogadorId, @RequestParam int jogoId, RedirectAttributes re) {
         Jogador j = jdao.find(jogadorId);
-        if(j.getJogos().contains(jodao.find(jogoId))){
+        if(jogoId == 0){
+            re.addFlashAttribute("erro", "Selecione um jogo!");
+        }
+        else if(j.getJogos().contains(jodao.find(jogoId))){
             re.addFlashAttribute("erro", "Jogo já consta na lista!");
         }
         else{
@@ -131,7 +127,6 @@ public class JogadorController {
     public ResponseEntity<?> removerJogo(@PathVariable int jogadorId, @PathVariable int jogoId) {
         Jogador j = jdao.find(jogadorId);
         Jogo jogo = jodao.find(jogoId);
-        System.out.println(j.getJogos().contains(jodao.find(jogoId)));
         j.getJogos().remove(jodao.find(jogoId));
         jdao.update(j);
         return ResponseEntity.ok().build();

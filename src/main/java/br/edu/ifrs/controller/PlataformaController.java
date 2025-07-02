@@ -29,13 +29,10 @@ public class PlataformaController {
 
     //carrega página inicial de plataforma
     @GetMapping("/plataforma")
-    public String listarPlataformas(@RequestParam(defaultValue = "0") int offset,
-                                    @RequestParam(defaultValue = "10") int limit,
-                                    Model model) {
-        List<Plataforma> plataformas = pdao.findAll(offset, limit);
-        model.addAttribute("plataformas", plataformas);
-        model.addAttribute("offset", offset);
-        model.addAttribute("limit", limit);
+    public String listarPlataformas(Model model) {
+        model.addAttribute("plataformas", pdao.findAll(0,100));
+        model.addAttribute("jogos", jodao.findAll(0,100));
+        model.addAttribute("jogadores", jdao.findAll(0,100));
         return "plataforma";
     }
 
@@ -64,7 +61,7 @@ public class PlataformaController {
             model.addAttribute("erroModal", "Erro ao salvar plataforma: " + e.getMessage());
             model.addAttribute("abrirModal", true);
             model.addAttribute("form", form);
-            return listarPlataformas(0,10,model);
+            return listarPlataformas(model);
         }
     }
 

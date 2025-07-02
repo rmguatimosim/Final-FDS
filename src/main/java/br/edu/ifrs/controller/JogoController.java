@@ -25,13 +25,9 @@ public class JogoController {
     private final PlataformaDao pdao = new PlataformaDao(ConnectionBD.connection("prodUnit"));
 
     @GetMapping("/jogo")
-    public String listarJogos(@RequestParam(defaultValue = "0") int offset,
-                              @RequestParam(defaultValue = "10") int limit,
-                              Model model) {
-        List<Jogo> jogos = jdao.findAll(offset, limit);
-        model.addAttribute("jogos", jogos);
-        model.addAttribute("offset", offset);
-        model.addAttribute("limit", limit);
+    public String listarJogos(Model model) {
+        model.addAttribute("jogos", jdao.findAll(0, 100));
+        model.addAttribute("plataformas", pdao.findAll(0,100));
         return "jogo";
     }
 
@@ -62,7 +58,7 @@ public class JogoController {
             model.addAttribute("erroModal", "Erro ao salvar jogo: " + e.getMessage());
             model.addAttribute("abrirModal", true);
             model.addAttribute("form", form);
-            return listarJogos(0,10,model);
+            return listarJogos(model);
         }
     }
     @PostMapping("/jogo/deletar/{id}")
